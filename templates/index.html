@@ -29,7 +29,7 @@
             </div>
         </div>
 
-
+        <!-- Status (Progresso do Usuário) -->
         <p class="small text-muted">Você já leu <strong>3 livros</strong> do Bosque!</p>
 
         <div class="progress w-75 mx-auto bg-dark-subtle" style="height: 12px; background-color: #adb5bd !important;">
@@ -37,14 +37,45 @@
         </div>
         <p class="text-center mt-2 mb-2 small text-muted">Faltam 80 XP para o nível Guardião</p>
 
-
-        <div>
+        <!-- Cadastro de livros-->
+    <div class="mb-5">
             <a href="/cadastrar_livros" class="btn btn-gamificado shadow-sm w-100">
-    ✍️ Cadastrar Livro
+                ✍️ Cadastrar Novo Livro
             </a>
         </div>
+        <!-- Estante de Livros -->
+        <div class="row mt-4">
+            <h3 class="mb-4">Minha Estante</h3>
 
+            {% for livro in livros %} <!-- Flask, Jinja2, Loop para ler livros do banco de dados e imprimir na tela inicial -->
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 card-livro">
+                                                                        
+                    <img src="{{ url_for('static', filename='uploads/' + livro[2]) }}" 
+                         class="card-img-top capa-livro" 
+                         alt="Capa do livro"> 
+                    
+                                         <!-- Livro [0] = titulo -->      
+                                         <!-- Livro [1] = páginas -->
+                                         <!-- Livro [2] = CAPA --> 
+                                         <!-- Livro [3] = ID do livro -->
+
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold">{{ livro[0] }}</h5>
+                        <p class="small text-muted">{{ livro[1] }} páginas</p>  
+                        <!-- Botão de deletar o Livro -->                                                                                                    
+                        <a href="{{ url_for('deletar_livro', id=livro[3]) }}" 
+                           class="btn btn-sm btn-outline-danger mt-2" 
+                           onclick="return confirm('Tem certeza que deseja excluir este livro?')">
+                           🗑️ Excluir
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %} <!-- Fecha o Loop de busca de livros do Jinja2 -->
+        </div>
     </div>
-    
+
+
 </body>
 </html>

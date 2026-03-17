@@ -51,3 +51,19 @@ a.btn-gamificado {
 .progress-bar {
     border-radius: 10px;
 }
+
+/* Tamanho das capas de livro na estante */
+.capa-livro{
+    width: 100%; /* Garante que ocupa a largura total do card */
+    height: 250px; /* Define uma altura fixa para todas as capas */ 
+    object-fit: cover; /* Recorta a imagem para preencher o espaço sem distorcer */
+}
+
+/* Card do livro, para deixar as bordas arrendondadas também, não só as imagens */
+.card-livro{
+    border-radius: 20px !important; /* Mesma curvatura do card de status */
+    overflow: hidden; /* ESSENCIAL: Garante que a imagem não "escape" das bordas arredondadas */
+    border: none;
+    box-shadow: 0 4px 12px rgba(40, 40, 40, 0.08)
+}
+
