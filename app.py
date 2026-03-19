@@ -55,8 +55,7 @@ def salvar_livro():
     # Salvando no banco de dados
     conexao = sqlite3.connect('livros.db')
     cursor = conexao.cursor()
-    cursor.execute("INSERT INTO livros (titulo, paginas, capa) VALUES (?, ?, ?)"
-                     (titulo, paginas, nome_foto))
+    cursor.execute("INSERT INTO livros (titulo, paginas, capa) VALUES (?, ?, ?)", (titulo, paginas, nome_foto))
     conexao.commit()
     conexao.close()
 
