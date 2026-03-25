@@ -25,17 +25,23 @@
         <div>
             <div class="card card-status p-4 mb-4">
                 <h5>🌲 Nível: Explorador</h5>
-                <span class="badge bg-success">XP: 120</span>
+                <span class="badge bg-success"> XP: {{ xp }}</span>
             </div>
         </div>
 
-        <!-- Status (Progresso do Usuário) -->
-        <p class="small text-muted">Você já leu <strong>3 livros</strong> do Bosque!</p>
+        <div class="progress mt-3" style="height: 20px;">
+            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                 role="progressbar"
+                 style="width: {{ (xp / 500) * 100 if xp else 0 }}%;"
+                 aria-valuenow="{{ xp }}"
+                 aria-valuemin="0"
+                 aria-valuemax="500">
+            </div>
+        </div>      
+        <small class="text-muted">Faltam {{ 500 - xp }} XP para o próximo nível</small>
 
-        <div class="progress w-75 mx-auto bg-dark-subtle" style="height: 12px; background-color: #adb5bd !important;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 60%;"></div>
-        </div>
-        <p class="text-center mt-2 mb-2 small text-muted">Faltam 80 XP para o nível Guardião</p>
+        <!-- Status (Progresso do Usuário) --> <!-- Quantos livros o leitor já leu -->
+        <p class="small text-muted">Você já leu <strong>{{ livros|length }} livros</strong> do Bosque!</p>
 
         <!-- Cadastro de livros-->
     <div class="mb-5">
