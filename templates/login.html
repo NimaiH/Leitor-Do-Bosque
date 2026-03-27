@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - Leitor do Bosque</title>
+    <!-- Adiciona biblioteca do bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- fontes do google -->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    <!-- link css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- classes de estilo -->
+    <style>
+        :root { --verde-bosque: #2d5a27; --creme-suave: #f8f9fa; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: linear-gradient(rgba(45, 90, 39, 0.1), rgba(45, 90, 39, 0.1)), 
+                        url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=1500');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .card-login {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        h2 { font-family: 'Libre+Baskerville', serif; color: var(--verde-bosque); }
+        .btn-bosque { 
+            background-color: var(--verde-bosque); 
+            color: white; 
+            border-radius: 30px; 
+            padding: 10px; 
+            width: 100%;
+            transition: 0.3s;
+        }
+        .btn-bosque:hover { background-color: #1e3d1a; color: white; transform: translateY(-2px); }
+        .form-control { border-radius: 10px; padding: 12px; border: 1px solid #ddd; }
+        .form-control:focus { border-color: var(--verde-bosque); box-shadow: 0 0 0 0.25 srgba(45, 90, 39, 0.25); }
+    </style>
+</head>
+<body>
+<!-- Barra de navegação do topo -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="text-center mb-4">
+                    <a href="/" class="text-decoration-none"><h1 class="h3 text-success fw-bold">🌲 Leitor do Bosque</h1></a>
+                </div>
+                
+                <div class="card card-login">
+                    <h2 class="text-center mb-4">Bem-vindo de volta</h2>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} small py-2">
+                            {{ message }}
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+
+                    <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">E-mail</label>
+                            <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Senha</label>
+                            <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-bosque shadow-sm mb-3">Entrar no Bosque</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p class="small text-muted">Ainda não tem uma conta? <br> 
+                        <a href="/cadastro" class="text-success fw-bold text-decoration-none">Criar Conta Gratuitamente</a></p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="/" class="text-white-50 small text-decoration-none">← Voltar para a página inicial</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
