@@ -67,3 +67,8 @@ a.btn-gamificado {
     box-shadow: 0 4px 12px rgba(40, 40, 40, 0.08)
 }
 
+.hero-section p.lead {
+    color: #444 !important;    /* Um cinza bem escuro, quase preto */
+    font-weight: 560;          /* Deixa a letra mais grossa (Semi-bold) */
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5); /* Adiciona um brilho leve atrás para destacar da foto */
+}

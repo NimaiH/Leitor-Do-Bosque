@@ -1,105 +1,134 @@
 import os
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
 
-# Configuração para salvar as imagens enviadas
+# Configurações
+app.secret_key = 'chave_secreta_do_bosque'
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Cria a pasta 'uploads' automaticamente se ela não existir
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+# --- Rotas de Autenticação (USUÁRIOS) ---
 
-# -----------------------------------------------------------------------------------------------------------#
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
 
+        conexao = sqlite3.connect('livros.db')
+        cursor = conexao.cursor()
+        cursor.execute("SELECT id, nome FROM usuarios WHERE email = ? AND senha = ?", (email, senha))
+        usuario = cursor.fetchone()
+        conexao.close()
 
-# Função HOME
+        if usuario:
+            session['usuario_id'] = usuario[0]
+            session['usuario_nome'] = usuario[1]
+            return redirect(url_for('home'))
+        return "E-mail ou senha incorretos!"
+    return render_template('login.html')
+
+@app.route('/cadastro')
+def cadastro():
+    return render_template('cadastro.html')
+
+@app.route('/salvar_usuario', methods=['POST'])
+def salvar_usuario():
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    senha = request.form.get('senha')
+
+    if nome and email and senha:
+        try:
+            conexao = sqlite3.connect('livros.db')
+            cursor = conexao.cursor()
+            cursor.execute("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)", (nome, email, senha))
+            conexao.commit()
+            conexao.close()
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            return "Este e-mail já está cadastrado."
+    return "Todos os campos são obrigatórios."
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+# --- Rotas principais (Estante de livros) ---
 
 @app.route('/')
 def home():
-    # 1. Conectar ao banco de dados
+    usuario_id = session.get('usuario_id')
+
+    if not usuario_id:
+        return render_template('index.html', livros=[], xp=0)
+
     conexao = sqlite3.connect('livros.db')
     cursor = conexao.cursor()
 
-    # 2. Busca os dados necessários para os cards da estante
-    # Pegando: Titulo (0), Paginas (1), Capa (2) e ID (3)
-    cursor.execute("SELECT titulo, paginas, capa, id FROM livros")
+    # Busca apenas os livros do usuário logado
+    cursor.execute("SELECT titulo, paginas, capa, id FROM livros WHERE usuario_id = ?", (usuario_id,))
     lista_livros = cursor.fetchall()
 
-    # 3. Busca a soma de todas as páginas para calcular o XP total
-    cursor.execute("SELECT SUM(paginas) FROM livros")
+    # Soma o XP apenas do usuário logado
+    cursor.execute("SELECT SUM(paginas) FROM livros WHERE usuario_id = ?", (usuario_id,))
     resultado_xp = cursor.fetchone()
-
-    # SUM retorna "none" se não conter nada nos dados então precisamos criar uma "regra" pra caso esse valor seja "none" mostrar 0 no site.
     xp_total = resultado_xp[0] if resultado_xp and resultado_xp[0] else 0
+    conexao.close()
 
-    # 5. Envia os livros e o XP para o index.html
     return render_template('index.html', livros=lista_livros, xp=xp_total)
 
-
-# -----------------------------------------------------------------------------------------------------------#
-
-
-# Cadastrar Livros
+# --- Gerenciamento de Livros ---
 
 @app.route('/cadastrar_livros')
 def cadastrar_livros():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login'))
     return render_template('cadastrar_livros.html')
-
-# -----------------------------------------------------------------------------------------------------------#
-
-
-# Rota que recebe os dados do formulário
 
 @app.route('/salvar_livro', methods=['POST'])
 def salvar_livro():
-    # Pegando os textos e foto do formulário
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return redirect(url_for('login'))
+
     titulo = request.form.get('titulo')
     paginas = request.form.get('paginas')
     foto = request.files.get('capa')
 
-    # Caso o usuário não envie foto.
     nome_foto = "padrão.jpg"
     if foto:
         nome_foto = foto.filename
-        caminho_foto = os.path.join(app.config['UPLOAD_FOLDER'], nome_foto)
-        foto.save(caminho_foto)
+        foto.save(os.path.join(app.config['UPLOAD_FOLDER'], nome_foto))
 
-    # Salvando no banco de dados
     conexao = sqlite3.connect('livros.db')
     cursor = conexao.cursor()
-    cursor.execute("INSERT INTO livros (titulo, paginas, capa) VALUES (?, ?, ?)",
-                   (titulo, paginas, nome_foto))
+    cursor.execute("INSERT INTO livros (titulo, paginas, capa, usuario_id) VALUES (?, ?, ?, ?)", 
+                   (titulo, paginas, nome_foto, usuario_id))
     conexao.commit()
     conexao.close()
 
-    # Voltar p/ pagina inicial.
     return redirect(url_for('home'))
-
-# -----------------------------------------------------------------------------------------------------------#
-
-
-# Função para Deletar Livros
 
 @app.route('/deletar_livro/<int:id>')
 def deletar_livro(id):
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return redirect(url_for('login'))
+
     conexao = sqlite3.connect('livros.db')
     cursor = conexao.cursor()
-    # Comando SQL para deletar baseado no ID único
-    cursor.execute("DELETE FROM livros WHERE id = ?", (id,))
+    # Segurança: Só deleta se o livro pertencer ao usuário logado
+    cursor.execute("DELETE FROM livros WHERE id = ? AND usuario_id = ?", (id, usuario_id))
     conexao.commit()
     conexao.close()
-
-    # Redireciona de volta para a home para atualizar a lista
     return redirect(url_for('home'))
-
-# -----------------------------------------------------------------------------------------------------------#
-
-# -----------------------------------------------------------------------------------------------------------#
-
 
 if __name__ == '__main__':
     app.run(debug=True)

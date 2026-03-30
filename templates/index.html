@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <!-- Faz o site se ajustar automaticamente ao tamanho da tela do celular. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor do Bosque - Início</title>
-    <!-- Importa o "manual de estilo" pronto para criar botões e colunas. -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "base.html" %}
+
+{% block title %}Leitor do Bosque - Início{% endblock %}
+
+{% block extra_css %}
     <style>
-
-       /* Variáveis de cores e estilos específicos que aplicamos apenas nesta página */
-        :root { --verde-bosque: #2d5a27; --creme-suave: #f8f9fa; }
-        body { font-family: 'Montserrat', sans-serif; background-color: var(--creme-suave); }
-        h1, h2, h3 { font-family: 'Libre+Baskerville', serif; color: var(--verde-bosque); }
-        .navbar { background-color: white; border-bottom: 3px solid var(--verde-bosque); }
-
-        /* Estilo da Hero Section: Imagem de fundo com uma camada clara por cima para dar leitura ao texto */
         .hero-section {
             background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), 
                         url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=1500');
@@ -25,62 +11,38 @@
             background-position: center;
             padding: 100px 0;
         }
-
-        /* Botão personalizado com o verde do projeto e efeito de levitar (translateY) ao passar o mouse */
-        .btn-bosque { background-color: var(--verde-bosque); color: white; border-radius: 30px; padding: 12px 30px; transition: 0.3s; }
-        .btn-bosque:hover { background-color: #1e3d1a; color: white; transform: translateY(-3px); }  
-              
+        
+        /* Mantendo o seu botão com efeito de levitar */
+        .btn-bosque { 
+            background-color: var(--verde-bosque); 
+            color: white; 
+            border-radius: 30px; 
+            padding: 12px 30px; 
+            transition: 0.3s; 
+        }
+        .btn-bosque:hover { 
+            background-color: #1e3d1a; 
+            color: white; 
+            transform: translateY(-3px); 
+        }
     </style>
-</head>
-<body>
+{% endblock %}
 
-<!-- INÍCIO DA BARRA. sticky-top FAZ ELA GRUDAR NO TOPO E shadow-sm CRIA UMA SOMBRA LEVE -->
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
-        <div class="container">
-            <!-- LOGO DO SITE: fw-bold DEIXA EM NEGRITO E text-success DEIXA VERDE -->
-            <a class="navbar-brand fw-bold text-success" href="/">🌲 Leitor do Bosque</a>
-            <!-- BOTÃO HAMBÚRGUER: APARECE SÓ NO CELULAR PARA ABRIR O MENU   -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- CONTAINER QUE ESCONDE OS LINKS NO CELULAR E MOSTRA NO PC -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- ul: LISTA DE LINKS. ms-auto EMPURRA TUDO PARA A DIREITA DA TELA -->
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link mx-2" href="#">Sobre o Bosque</a></li>
-                    <li class="nav-item"><a class="nav-link mx-2" href="#">Ranking</a></li>
-                    <!-- LÓGICA JINJA2: SE O USUÁRIO ESTIVER LOGADO (COM ID NA SESSÃO) -->
-                    {% if session.get('usuario_id') %}
-                        <li class="nav-item"><a class="nav-link mx-2 fw-bold" href="/dashboard">Minha Estante</a></li>
-                        <li class="nav-item"><a class="btn btn-outline-danger btn-sm ms-lg-3" href="/logout">Sair</a></li>
-                        <!-- CASO NÃO ESTEJA LOGADO (MOSTRA BOTÃO DE ENTRAR) -->
-                    {% else %}
-                        <li class="nav-item"><a class="btn btn-bosque btn-sm ms-lg-3" href="/login">Entrar / Cadastrar</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- É o "cartaz" principal do site, com o título e o botão de ação. -->
+{% block content %}
     <header class="hero-section text-center">
         <div class="container">
-            <!-- CRIA UMA LINHA E CENTRALIZA O CONTEÚDO NO MEIO DA TELA -->
             <div class="row justify-content-center">
-                <!-- DEFINE QUE O TEXTO OCUPARÁ 8 DAS 12 COLUNAS (PARA NÃO FICAR LARGO DEMAIS) -->
                 <div class="col-lg-8">
-                    <!-- TÍTULO PRINCIPAL COM FONTE GRANDE (DISPLAY-3) E NEGRITO (FW-BOLD) -->
                     <h1 class="display-3 fw-bold mb-4">Sua jornada literária começa aqui.</h1>
-                    <!-- TEXTO DE APOIO (LEAD) COM COR CINZA (TEXT-SECONDARY) -->
-                    <p class="lead text-secondary mb-5">
+                    <p class="lead mb-5" style="color: #444; font-weight: 600;">
                         Transforme cada página lida em experiência, suba de nível e descubra o prazer de ler no coração do Itaquera.
                     </p>
-                    <!-- AGRUPAMENTO DOS BOTÕES QUE SE AJUSTAM NO CELULAR (D-SM-FLEX) -->
                     <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                        <!-- BOTÃO PRINCIPAL: VERDE (BTN-BOSQUE), GRANDE (LG) E COM SOMBRA (SHADOW) -->
-                        <a href="/login" class="btn btn-bosque btn-lg px-5 shadow">Começar Agora</a>
-                        <!-- BOTÃO SECUNDÁRIO: APENAS A BORDA VERDE (BTN-OUTLINE-SUCCESS) -->
-                        <a href="#" class="btn btn-outline-success btn-lg px-5">Ver Ranking</a>
+                        {% if not session.get('usuario_id') %}
+                            <a href="/login" class="btn btn-bosque btn-lg px-5 shadow">Começar Agora</a>
+                        {% else %}
+                            <a href="/cadastrar_livros" class="btn btn-bosque btn-lg px-5 shadow">Minha Estante</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -89,27 +51,21 @@
 
     <section class="py-5 container text-center">
         <div class="row g-4">
-            <!-- COLUNA 1 - ESTANTE ORGANIZADA -->
             <div class="col-md-4">
-                <!-- ESTILO: FUNDO BRANCO, SOMBRA LEVE E BORDAS ARREDONDADAS -->
                 <div class="p-4 bg-white shadow-sm rounded-4 h-100">
                     <h3 class="h1">📚</h3>
                     <h4 class="fw-bold">Estante Organizada</h4>
                     <p class="text-muted">Cadastre seus livros e tenha controle total da sua biblioteca pessoal.</p>
                 </div>
             </div>
-            <!-- COLUNA 2 - SISTEMA DE XP -->
             <div class="col-md-4">
-                <!-- ESTILO: MESMO PADRÃO PARA MANTER A CONSISTÊNCIA VISUAL -->
                 <div class="p-4 bg-white shadow-sm rounded-4 h-100">
                     <h3 class="h1">⭐</h3>
                     <h4 class="fw-bold">Sistema de XP</h4>
                     <p class="text-muted">Cada página lida conta! Suba de nível e mostre sua evolução como leitor.</p>
                 </div>
             </div>
-            <!-- COLUNA 3 - RANKING LOCAL -->
             <div class="col-md-4">
-                <!-- ESTILO: h-100 GARANTE QUE OS 3 CARDS TENHAM A MESMA ALTURA -->
                 <div class="p-4 bg-white shadow-sm rounded-4 h-100">
                     <h3 class="h1">🏆</h3>
                     <h4 class="fw-bold">Ranking Local</h4>
@@ -118,12 +74,4 @@
             </div>
         </div>
     </section>
-
-    <footer class="text-center py-4 text-muted border-top bg-white">
-        <small>&copy; 2026 Leitor do Bosque - Projeto Integrador Univesp</small>
-    </footer>
-
-    <!-- Ativa as animações (como o menu que abre no celular). -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
