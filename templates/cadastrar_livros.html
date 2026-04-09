@@ -1,72 +1,176 @@
 {% extends "base.html" %}
 
-{% block title %}Adicionar Livro - Leitor do Bosque{% endblock %}
+{% block title %}Cadastrar Novo Livro - Leitor do Bosque{% endblock %}
 
 {% block extra_css %}
 <style>
-    .card-formulario {
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        max-width: 520px;
-        margin: 0 auto;
+    .cadastro-livro-wrapper {
+        background: linear-gradient(rgba(200, 217, 193, 0.7), rgba(200, 217, 193, 0.7)),
+                    url('https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=1500');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
     }
-    .form-control {
-        border-radius: 10px;
+    .card-cadastro-livro { border-radius: 20px; border: none; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); }
+    
+    /* Lista de Sugestões Estilizada */
+    #lista_resultados {
+        max-height: 300px;
+        overflow-y: auto;
+        border-radius: 0 0 15px 15px;
         border: 1px solid #c3d9c1;
-        padding: 10px 14px;
     }
-    .form-control:focus {
-        border-color: #2d5a27;
-        box-shadow: 0 0 0 0.2rem rgba(45, 90, 39, 0.15);
-    }
-    .form-label {
-        color: #2d5a27;
-        font-weight: 600;
-        font-size: 0.9rem;
+    .badge-xp { background-color: #2d5a27; color: white; border-radius: 10px; padding: 4px 8px; font-size: 0.7rem; }
+    
+    /* Botão de XP que não parece campo de texto */
+    .status-xp {
+        background: #f8f9fa;
+        border: 2px dashed #c3d9c1;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        color: #666;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="cadastro-livro-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card card-cadastro-livro shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h1 class="h2" style="color: var(--verde-bosque); font-family: 'Libre Baskerville', serif;">Novo Livro</h1>
+                            <p class="text-muted">Busque o título para carregar os dados reais 🌿</p>
+                        </div>
 
-    <div class="text-center mb-4">
-        <h2 style="font-family: 'Libre Baskerville', serif; color: #2d5a27;">Novo Registro</h2>
-        <p class="text-muted">Adicione um livro ao seu histórico</p>
+                        <form action="/salvar_livro" method="POST" id="form_livro">
+                            <input type="hidden" id="capa_url_input" name="capa_url">
+                            <input type="hidden" id="paginas_input" name="paginas">
+                            <input type="hidden" id="titulo_final" name="titulo">
+
+                            <div class="mb-4 position-relative">
+                                <label class="form-label fw-bold">Buscar Título</label>
+                                <input type="text" id="titulo_busca" class="form-control form-control-lg" placeholder="Ex: Harry Potter..." autocomplete="off" required>
+                                
+                                <div id="lista_resultados" class="list-group position-absolute w-100 shadow-lg" style="z-index: 1000; display: none;">
+                                    </div>
+                            </div>
+
+                            <div id="status_selecionado" class="status-xp mb-4">
+                                <div id="preview_capa" class="mb-2"></div>
+                                <div id="detalhes_livro">Nenhum livro selecionado ainda</div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" id="btn_confirmar" class="btn btn-bosque btn-lg" disabled>Confirmar e Adicionar</button>
+                                <a href="/estante" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="card card-formulario p-4 p-md-5">
-        <form action="/salvar_livro" method="POST" enctype="multipart/form-data">
-
-            <div class="mb-3">
-                <label class="form-label">Título do Livro</label>
-                <input type="text" name="titulo" class="form-control"
-                       placeholder="Ex: Dom Casmurro" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Foto da Capa <span class="text-muted fw-normal">(opcional)</span></label>
-                <input type="file" name="capa" class="form-control" accept="image/*">
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label">Número de Páginas</label>
-                <input type="number" name="paginas" class="form-control"
-                       placeholder="Ex: 180" min="1">
-            </div>
-
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-bosque btn-lg">
-                    📚 Salvar no Histórico
-                </button>
-                <a href="/estante" class="btn btn-outline-secondary">
-                    ← Voltar para Minha Estante
-                </a>
-            </div>
-
-        </form>
-    </div>
-
 </div>
+
+<script>
+    const inputBusca = document.getElementById('titulo_busca');
+    const listaSugestoes = document.getElementById('lista_resultados');
+    const btnConfirmar = document.getElementById('btn_confirmar');
+    const statusDetalhes = document.getElementById('detalhes_livro');
+    
+    let tempoEspera;
+
+    inputBusca.addEventListener('input', () => {
+        clearTimeout(tempoEspera);
+        const termo = inputBusca.value.trim();
+        
+        if (termo.length < 3) {
+            listaSugestoes.style.display = 'none';
+            return;
+        }
+
+        tempoEspera = setTimeout(() => buscarLivro(termo), 600);
+    });
+
+    async function buscarLivro(termo) {
+    listaSugestoes.innerHTML = '<div class="list-group-item">Procurando no oráculo...</div>';
+    listaSugestoes.style.display = 'block';
+
+    try {
+        // Mudamos o termo para ser mais específico e removemos espaços extras
+        const query = encodeURIComponent(termo.trim());
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books`);
+        
+        if (!response.ok) throw new Error('Falha na resposta da API');
+        
+        const data = await response.json();
+
+        listaSugestoes.innerHTML = '';
+        if (data.items && data.items.length > 0) {
+            data.items.forEach(item => {
+                const info = item.volumeInfo;
+                const titulo = info.title;
+                const paginas = info.pageCount || 0;
+                
+                // Pegamos a melhor resolução de imagem disponível
+                let capa = '';
+                if (info.imageLinks) {
+                    capa = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail;
+                    // Forçamos o link a ser HTTPS para evitar bloqueios de segurança
+                    capa = capa.replace('http://', 'https://');
+                }
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-3';
+                btn.innerHTML = `
+                    <img src="${capa || 'https://via.placeholder.com/40x60?text=Sem+Capa'}" style="width: 40px; height: 60px; border-radius: 4px; object-fit: cover;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="fw-bold small text-truncate">${titulo}</div>
+                        <span class="badge-xp">${paginas} Páginas</span>
+                    </div>
+                `;
+                btn.onclick = () => selecionar(titulo, paginas, capa);
+                listaSugestoes.appendChild(btn);
+            });
+        } else {
+            listaSugestoes.innerHTML = '<div class="list-group-item text-danger">Nenhum livro encontrado. Tente ser mais específico!</div>';
+        }
+    } catch (error) {
+        console.error("Erro na busca:", error);
+        listaSugestoes.innerHTML = '<div class="list-group-item text-warning">Erro de conexão. Verifique sua internet!</div>';
+    }
+}
+
+    function selecionar(titulo, paginas, capa) {
+        // Preenche os campos ocultos que vão para o Python
+        document.getElementById('titulo_final').value = titulo;
+        document.getElementById('paginas_input').value = paginas;
+        document.getElementById('capa_url_input').value = capa;
+        
+        // Atualiza a interface
+        inputBusca.value = titulo;
+        listaSugestoes.style.display = 'none';
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = `Adicionar à Estante (+${paginas} XP)`;
+
+        const previewCapa = document.getElementById('preview_capa');
+        if (capa) {
+            previewCapa.innerHTML = `<img src="${capa}" style="height: 120px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">`;
+        } else {
+            previewCapa.innerHTML = "📖";
+        }
+        
+        statusDetalhes.innerHTML = `<strong class="text-success">${titulo}</strong><br><small>${paginas} páginas confirmadas</small>`;
+    }
+</script>
 {% endblock %}
