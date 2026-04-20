@@ -58,10 +58,38 @@ def login():
         return render_template('login.html', erro="E-mail ou senha incorretos. Tente novamente.")
     return render_template('login.html')
 
+# ----------------- Cadastro de usuários -----------------#
+
 
 @app.route('/cadastro')
 def cadastro():
     return render_template('cadastro.html')
+
+
+@app.route('/salvar_usuario', methods=['POST'])
+def salvar_usuario():
+    # Coleta os dados do formulário
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    senha = request.form.get('senha')
+
+    conexao = sqlite3.connect('livros.db')
+    cursor = conexao.cursor()
+
+    try:
+        # Insere os dados na tabela do banco de dados
+        cursor.execute(
+            "INSERT INTO usuarios (nome, email, senha) VALUES (?,?,?)",
+            (nome, email, senha)
+        )
+        conexao.commit()
+    except sqlite3.IntegrityError:
+        return "Erro: Este email já está registrado!"
+    finally:
+        conexao.close()
+
+        # Redireciona para o login após o cadastro (Para o usuário fazer o login com o cadastro que ele acabou de fazer)
+        return redirect(url_for('login'))
 
 
 @app.route('/logout')

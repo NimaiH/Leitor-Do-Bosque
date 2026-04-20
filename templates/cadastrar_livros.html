@@ -92,8 +92,8 @@
     inputBusca.addEventListener('input', () => {
         clearTimeout(tempoEspera);
         const termo = inputBusca.value.trim();
-        
-        if (termo.length < 3) {
+        /* Mostra os livros apenas depois de o usuário inserir 3 caracteres */
+        if (termo.length < 3    ) {
             listaSugestoes.style.display = 'none';
             return;
         }
@@ -147,7 +147,7 @@
         }
     } catch (error) {
         console.error("Erro na busca:", error);
-        listaSugestoes.innerHTML = '<div class="list-group-item text-warning">Erro de conexão. Verifique sua internet!</div>';
+        listaSugestoes.innerHTML = '<div class="list-group-item text-warning">Livro não encontrado, tente novamente!</div>';
     }
 }
 
