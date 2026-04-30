@@ -1,73 +1,85 @@
-    {% extends "base.html" %}
+{% extends "base.html" %}
 
-    {% block extra_css %}
-    <style>
-        body { 
-            /* Imagem de floresta mística com overlay para legibilidade */
-            background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6)), 
-                            url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2070&auto=format&fit=crop');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-        }
+{% block title %}Ranking - Leitor do Bosque{% endblock %}
 
-        /* Card do ranking com efeito de vidro (Glassmorphism) */
-        .table-responsive {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--verde-bosque);
-            border-radius: 15px;
-        }
+{% block extra_css %}
+<style>
+    /* ─── AMBIENTAÇÃO ──────────────────────────────────────────────────
+       Boas Práticas: O 'background-attachment: fixed' cria o efeito de fundo 
+       estático, dando uma sensação de profundidade profissional ao site.
+    */
+    body { 
+        background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6)), 
+                        url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2070&auto=format&fit=crop');
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+    }
 
-        /* Destaque para o primeiro colocado (Ouro) */
-        tr:nth-child(1) {
-            background-color: rgba(255, 215, 0, 0.1);
-            border-left: 5px solid #ffd700;
-        }
-    </style>
-    {% endblock %}
+    /* Glassmorphism: Aplica desfoque no fundo para destacar a tabela. */
+    .table-responsive {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--verde-bosque);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
 
-    {% block title %}Ranking - Leitor do Bosque{% endblock %}
+    /* 🏆 DESTAQUE DO CAMPEÃO: O primeiro lugar ganha um visual de "Ouro". */
+    tr:nth-child(1) {
+        background-color: rgba(255, 215, 0, 0.1) !important;
+        border-left: 5px solid #ffd700;
+    }
+</style>
+{% endblock %}
 
-    {% block content %}
-    <div class="container py-5">
-        <h2 class="mb-4" style="color: #2d5a27; font-family: 'Libre Baskerville', serif;">
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold" style="color: #2d5a27; font-family: 'Libre Baskerville', serif;">
             🏆 Ranking de Itaquera
         </h2>
-
-        <div class="table-responsive bg-white rounded-4 shadow-sm p-3">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">Posição</th>
-                        <th scope="col">Leitor</th>
-                        <th scope="col">Título</th>
-                        <th scope="col" class="text-center">Livros</th>
-                        <th scope="col" class="text-end">XP Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for nome, xp, total_livros in ranking %}
-                        {% set xp_final = xp if xp else 0 %}
-                        {% set nivel = (xp_final // divisor) + 1 %}
-                        
-                        {# Lógica de Títulos e Ícones #}
-                        {% if nivel <= 3 %}{% set t, i = "Broto do Bosque", "🌱" %}
-                        {% elif nivel <= 9 %}{% set t, i = "Guardião das Trilhas", "🌿" %}
-                        {% elif nivel <= 19 %}{% set t, i = "Protetor da Fauna", "🌳" %}
-                        {% elif nivel <= 39 %}{% set t, i = "Sábio das Sombras", "🦉" %}
-                        {% else %}{% set t, i = "Mestre de Itaquera", "✨" %}{% endif %}
-
-                    <tr>
-                        <th scope="row" class="ps-3">{{ loop.index }}º</th>
-                        <td class="fw-bold">{{ nome }}</td>
-                        <td><span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ i }} {{ t }} (Nív. {{ nivel }})</span></td>
-                        <td class="text-center">{{ total_livros }}</td>
-                        <td class="text-end fw-bold text-success">{{ xp_final }} XP</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <p class="text-muted">Veja quem são os maiores guardiões do bosque local</p>
     </div>
-    {% endblock %}
+
+    <div class="table-responsive p-3">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="ps-3">Posição</th>
+                    <th scope="col">Leitor</th>
+                    <th scope="col">Título de Rank</th>
+                    <th scope="col" class="text-center">Livros</th>
+                    <th scope="col" class="text-end pe-3">XP Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 🎓 MOTOR DE GAMIFICAÇÃO: O loop.index gera a posição automaticamente[cite: 8]. -->
+                {% for nome, xp, total_livros in ranking %}
+                    {% set xp_final = xp if xp else 0 %}
+                    {% set nivel = (xp_final // divisor) + 1 %}
+                    
+                    {# 🌳 Lógica de Títulos Dinâmicos #}
+                    {% if nivel <= 3 %}{% set t, i = "Broto do Bosque", "🌱" %}
+                    {% elif nivel <= 9 %}{% set t, i = "Guardião das Trilhas", "🌿" %}
+                    {% elif nivel <= 19 %}{% set t, i = "Protetor da Fauna", "🌳" %}
+                    {% elif nivel <= 39 %}{% set t, i = "Sábio das Sombras", "🦉" %}
+                    {% else %}{% set t, i = "Mestre de Itaquera", "✨" %}{% endif %}
+
+                <tr>
+                    <th scope="row" class="ps-3">{{ loop.index }}º</th>
+                    <td class="fw-bold">{{ nome }}</td>
+                    <td>
+                        <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-2">
+                            {{ i }} {{ t }} <small class="opacity-75">(Nível {{ nivel }})</small>
+                        </span>
+                    </td>
+                    <td class="text-center">{{ total_livros }}</td>
+                    <td class="text-end fw-bold text-success pe-3">{{ xp_final }} XP</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

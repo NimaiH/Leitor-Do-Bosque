@@ -4,59 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- 🎓 TITULO DINÂMICO: Cada página pode definir seu próprio título -->
     <title>{% block title %}Leitor do Bosque{% endblock %}</title>
 
+    <!-- 📚 FRAMEWORKS EXTERNOS: Bootstrap para layout e Google Fonts para estilo -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    
+    <!-- 🎨 CSS LOCAL: Link para o arquivo que revisamos anteriormente -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
-        /* CONFIGURAÇÕES DE CORES: Definimos as cores padrão do projeto */
-        :root { 
-            --verde-bosque: #2d5a27; 
-            --creme-suave: #f8f9fa; 
-        }
-        
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background-color: var(--creme-suave); 
-        }
-        
-        h1, h2, h3 { 
-            font-family: 'Libre Baskerville', serif; 
-            color: var(--verde-bosque); 
-        }
+    /* ── FIX NAVBAR (Boas Práticas) ────────────────────────────────────────── */
+    .navbar {
+        background-color: white !important; /* Força o fundo branco sólido */
+        z-index: 1030; /* Garante que a barra fique ACIMA de qualquer outro elemento */
+        border-bottom: 2px solid var(--verde-bosque, #2d5a27);
+    }
 
-        /* ESTILO DA NAVBAR: Fundo branco com uma linha verde grossa embaixo */
-        .navbar { 
-            background-color: white; 
-            border-bottom: 3px solid var(--verde-bosque); 
-        }
-        
-        /* BOTÃO PERSONALIZADO: Arredondado e com efeito de subir ao passar o mouse */
-        .btn-bosque { 
-            background-color: var(--verde-bosque); 
-            color: white; 
-            border-radius: 30px; 
-            padding: 8px 25px; 
-            transition: 0.3s; 
-            border: none;
-        }
-        .btn-bosque:hover { 
-            background-color: #1e3d1a; 
-            color: white; 
-            transform: translateY(-2px); 
-        }
+    /* Adiciona um leve preenchimento no topo do conteúdo para não "colar" na barra */
+    main {
+        min-height: 85vh;
+    }
     </style>
-    
+
+
+    <!-- 🎓 BLOCO EXTRA: Usado para estilos específicos de páginas (como o fundo de RPG do Ranking) -->
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+    <!-- ─── NAVBAR (BARRA DE NAVEGAÇÃO) ──────────────────────────────────────────
+         Boas Práticas: Usar 'sticky-top' para a barra acompanhar a rolagem. 
+    -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold text-success" href="/">🌲 Leitor do Bosque</a>
             
+            <!-- Botão Hamburguer para Celular (Responsividade) -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -66,6 +51,7 @@
                     <li class="nav-item"><a class="nav-link mx-2" href="/sobre">Sobre o Bosque</a></li>
                     <li class="nav-item"><a class="nav-link mx-2" href="/ranking">Ranking</a></li>
 
+                    <!-- 🔐 LÓGICA DE SESSÃO: Só mostra 'Minha Estante' se o usuário estiver logado -->
                     {% if session.get('usuario_id') %}
                         <li class="nav-item">
                             <a class="nav-link mx-2 fw-bold" href="/estante">Minha Estante</a>
@@ -77,6 +63,7 @@
                             <a class="btn btn-outline-danger btn-sm ms-lg-3" href="/logout">Sair</a>
                         </li>
                     {% else %}
+                        <!-- Botão visível apenas para quem não está logado -->
                         <li class="nav-item">
                             <a class="btn btn-bosque btn-sm ms-lg-3" href="/login">Entrar / Cadastrar</a>
                         </li>
@@ -86,10 +73,14 @@
         </div>
     </nav>
 
+    <!-- ─── CONTEÚDO PRINCIPAL ──────────────────────────────────────────────────
+         Aqui é onde as outras páginas (index, estante, ranking) serão "injetadas".
+    -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
+    <!-- ⚡ SCRIPTS: Essenciais para o funcionamento de menus e modais do Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>

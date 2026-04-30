@@ -1,31 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}Cadastro - Leitor do Bosque{% endblock %}
+{% block title %}Criar Conta - Leitor do Bosque{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* 🌲 A Mágica Acontece Aqui: Imagem de Fundo na Caixa Centralizadora */
+    /* ─── DESIGN DE IMERSÃO ───────────────────────────────────────────
+       Boas Práticas: O uso de gradientes sobre a imagem (overlay) garante 
+       que o texto tenha contraste suficiente para leitura (Acessibilidade).
+    */
     .cadastro-wrapper {
         background: linear-gradient(rgba(200, 217, 193, 0.7), rgba(200, 217, 193, 0.7)),
                     url('https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&q=80&w=1500');
         background-size: cover;
         background-position: center;
-        min-height: 85vh; /* Ajustado para não brigar com a navbar */
+        min-height: 85vh; 
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 50px 0;
     }
+
+    /* Glassmorphism: Tendência que une transparência e desfoque, 
+       dando profundidade ao card de cadastro.
+    */
     .card-cadastro {
         border-radius: 20px;
         border: none;
         width: 100%;
-        background: rgba(255, 255, 255, 0.95); /* Deixa o card levemente transparente */
-        backdrop-filter: blur(5px); /* Efeito de vidro borrado */
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(5px); 
     }
+
+    /* Campos de Entrada: Bordas suaves com a cor do tema 'Bosque'. */
     .form-control {
         border-radius: 10px;
         border: 1px solid #c3d9c1;
+        padding: 12px;
+    }
+
+    .form-control:focus {
+        border-color: var(--verde-bosque);
+        box-shadow: 0 0 0 0.25 cold-rgba(45, 90, 39, 0.25);
     }
 </style>
 {% endblock %}
@@ -34,21 +49,26 @@
 <div class="cadastro-wrapper">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-5"> <div class="card card-cadastro shadow-lg">
+            <div class="col-md-8 col-lg-5"> 
+                <div class="card card-cadastro shadow-lg">
                     <div class="card-body p-5">
                         <div class="text-center mb-5">
                             <h1 class="h2" style="color: var(--verde-bosque); font-family: 'Libre Baskerville', serif;">Leitor do Bosque</h1>
                             <p class="text-muted">Crie sua conta e comece sua jornada literária</p>
                         </div>
 
+                        <!-- 🛡️ FEEDBACK DE ERRO: Importante para informar se o e-mail já existe[cite: 2, 5]. -->
                         {% if erro %}
-                        <div class="alert alert-danger">{{ erro }}</div>
+                        <div class="alert alert-danger border-0 shadow-sm" role="alert">
+                            {{ erro }}
+                        </div>
                         {% endif %}
 
+                        <!-- 📝 FORMULÁRIO DE CAPTURA: O atributo 'name' deve bater com o request.form no app.py[cite: 2, 5]. -->
                         <form action="/salvar_usuario" method="POST">
                             <div class="mb-4">
                                 <label for="nome" class="form-label fw-bold">Nome Completo</label>
-                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Seu Nome" required>
+                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Como quer ser chamado?" required>
                             </div>
 
                             <div class="mb-4">
@@ -58,16 +78,16 @@
 
                             <div class="mb-5">
                                 <label for="senha" class="form-label fw-bold">Senha</label>
-                                <input type="password" class="form-control" id="senha" name="senha" placeholder="********" required>
+                                <input type="password" class="form-control" id="senha" name="senha" placeholder="Crie uma senha forte" required>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-bosque btn-lg">Cadastrar</button>
+                                <button type="submit" class="btn btn-bosque btn-lg py-3 fw-bold">Cadastrar e Iniciar Jornada</button>
                             </div>
                         </form>
 
                         <div class="text-center mt-4">
-                            <p class="text-muted">Já tem uma conta? <a href="/login" class="text-success fw-bold">Faça login</a></p>
+                            <p class="text-muted">Já faz parte do bosque? <a href="/login" class="text-success fw-bold text-decoration-none">Faça login</a></p>
                         </div>
                     </div>
                 </div>
@@ -75,4 +95,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}  

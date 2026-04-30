@@ -1,1 +1,15 @@
-* @NimaiH
+# ─── GOVERNANÇA DO REPOSITÓRIO ──────────────────────────────────────────────
+# Este arquivo define quais indivíduos ou times são responsáveis pelo código.
+# Quando alguém abrir um Pull Request, os "Owners" serão notificados.
+
+# O caractere '*' significa "todos os arquivos do repositório"
+# @NimaiH é o seu usuário do GitHub que terá poder de revisão total.
+
+*       @NimaiH
+
+# ─── EXEMPLOS PARA ESTUDO (SUBTÓPICOS) ──────────────────────────────────────
+# * Se no futuro você tiver um designer, poderia fazer:
+# /static/  @usuario_do_designer
+#
+# * Se tiver alguém focado apenas no Banco de Dados:
+# database.py  @especialista_sql

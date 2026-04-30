@@ -1,1 +1,14 @@
+# Ambientes Virtuais
 venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Banco de Dados (Melhor não subir o .db se tiver dados pessoais)
+livros.db
+
+# IDEs
+.vscode/
+.idea/

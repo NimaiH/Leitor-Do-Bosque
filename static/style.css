@@ -1,74 +1,136 @@
-/* static/style.css */
+/* 
+   ==========================================================================
+   ESTILO GLOBAL E VARIÁVEIS
+   ========================================================================== 
+   Boas Práticas: Usar variáveis (:root) facilita mudar a identidade visual 
+   do projeto (ex: mudar de 'Bosque' para 'Itaquaquecetuba') em um só lugar.
+*/
 
-/* Configurações Gerais */
+:root {
+    --verde-principal: #2ecc71;      /* Cor de sucesso e gamificação */
+    --verde-hover: #27ae60;          /* Tom mais escuro para interação */
+    --cinza-texto: #333333;          /* Cor padrão para leitura */
+    --sombra-suave: 0 4px 12px rgba(0,0,0,0.08); /* Elevação padrão dos cards */
+    --raio-borda: 20px;              /* Curvatura padrão dos elementos */
+}
+
+/* Configurações Gerais: Reset e tipografia básica */
 body { 
     background-color: #ffffff; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
+    color: var(--cinza-texto);
+    margin: 0;
+    padding: 0;
 }
 
-/* Card de Status (Perfil e Progresso) */
+/* 
+   ==========================================================================
+   COMPONENTES DE UI (INTERFACE DO USUÁRIO)
+   ========================================================================== 
+*/
+
+/* Card de Status: Usado no Perfil e Progresso do usuário */
 .card-status { 
-    border-radius: 20px; 
+    border-radius: var(--raio-borda); 
     border: none; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+    box-shadow: var(--sombra-suave); 
     background: white;
+    padding: 20px;
 }
 
-/* Botão Principal Gamificado */
-.btn-gamificado { 
-    background-color: #2ecc71; 
-    color: white;   
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 15px;
-    border: none;
-    transition: 0.3s ease;
-    text-decoration: none;
-    display: flex;
+/* Unificando os nomes para evitar erro: agora aceita tanto 'bosque' quanto 'gamificado' */
+.btn-bosque, .btn-gamificado { 
+    background-color: #2d5a27 !important; /* Verde oficial do Bosque */
+    color: white !important;   
+    font-weight: bold !important;
+    border-radius: 12px !important;
+    padding: 12px 25px !important;
+    border: none !important;
+    transition: 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Efeito ao passar o mouse ou tocar no botão */
+/* Efeito de interação */
+.btn-bosque:hover, .btn-gamificado:hover {
+    background-color: #1e3d1a !important;
+    transform: translateY(-3px) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+}
+
+/* Interação de Hover: Feedback visual quando o usuário interage */
 .btn-gamificado:hover {
-    background-color: #27ae60;
-    transform: scale(1.02);
+    background-color: var(--verde-hover);
+    transform: scale(1.02); /* Efeito de "pulsar" levemente para fora */
     color: white;
 }   
 
-/* Ajustes para links que parecem botões */
-a.btn-gamificado {
-    text-decoration: none;
-}
-
-/* Estilização da Barra de Progresso */
+/* Estilização da Barra de Progresso: Customizando o padrão do Bootstrap */
 .progress {
     background-color: #e9ecef;
     border-radius: 10px;
+    height: 12px; /* Define uma altura consistente */
 }
 
 .progress-bar {
     border-radius: 10px;
+    /* A cor da barra é definida no HTML/Inline dependendo do nível */
 }
 
-/* Tamanho das capas de livro na estante */
-.capa-livro{
-    width: 100%; /* Garante que ocupa a largura total do card */
-    height: 250px; /* Define uma altura fixa para todas as capas */ 
-    object-fit: cover; /* Recorta a imagem para preencher o espaço sem distorcer */
-}
+/* 
+   ==========================================================================
+   SISTEMA DE ESTANTE E LIVROS
+   ========================================================================== 
+*/
 
-/* Card do livro, para deixar as bordas arrendondadas também, não só as imagens */
-.card-livro{
-    border-radius: 20px !important; /* Mesma curvatura do card de status */
-    overflow: hidden; /* ESSENCIAL: Garante que a imagem não "escape" das bordas arredondadas */
+/* Card do livro: Container principal de cada obra */
+.card-livro {
+    border-radius: var(--raio-borda) !important; 
+    overflow: hidden; /* ESSENCIAL: Recorta a imagem para respeitar o arredondamento do card */
     border: none;
-    box-shadow: 0 4px 12px rgba(40, 40, 40, 0.08)
+    box-shadow: var(--sombra-suave);
+    transition: transform 0.3s ease;
 }
+
+.card-livro:hover {
+    transform: translateY(-5px); /* Efeito de flutuar ao passar o mouse */
+}
+
+/* Tamanho das capas: Garante que o grid fique simétrico mesmo com imagens diferentes */
+.capa-livro {
+    width: 100%; 
+    height: 250px; 
+    object-shadow: none;
+    object-fit: cover; /* Mantém a proporção da imagem sem esticar (aspect ratio) */
+}
+
+/* 
+   ==========================================================================
+   SEÇÕES ESPECÍFICAS (LANDING PAGE)
+   ========================================================================== 
+*/
 
 .hero-section p.lead {
-    color: #444 !important;    /* Um cinza bem escuro, quase preto */
-    font-weight: 560;          /* Deixa a letra mais grossa (Semi-bold) */
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.5); /* Adiciona um brilho leve atrás para destacar da foto */
+    color: #444 !important;    
+    font-weight: 560;          
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5); 
 }
+
+/* ─── FIX DA NAVBAR (REVISÃO DE CAMADAS) ───────────────────────────────────
+   Boas Práticas: Definir um fundo sólido e prioridade de camada máxima.
+*/
+
+.navbar {
+    background-color: white !important; /* Torna a barra opaca */
+    z-index: 2000 !important;           /* Coloca a barra na "frente" de tudo[cite: 3] */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; /* Dá profundidade[cite: 3] */
+}
+
+/* 
+   🎓 NOTA DE ESTUDO: 
+   Usamos o z-index 2000 porque elementos do Bootstrap (como modais) 
+   costumam usar 1050. Assim, garantimos que nossa barra nunca seja "atropelada".
+*/

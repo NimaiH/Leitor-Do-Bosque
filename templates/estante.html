@@ -4,16 +4,22 @@
 
 {% block extra_css %}
 <style>
-    /* ── Background Temático ── */
+    /* ─── AMBIENTAÇÃO VISUAL ──────────────────────────────────────────────
+       Boas Práticas: O 'background-attachment: fixed' cria um efeito de 
+       profundidade (parallax) enquanto os cards deslizam por cima.
+    */
     body { 
-        background-image: linear-gradient(rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.8)), 
+        background-image: linear-gradient(rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.9)), 
                           url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2071');
         background-attachment: fixed;
         background-size: cover;
         background-position: center;
     }
 
-    /* ── Card de XP ── */
+    /* ─── DASHBOARD DE XP (SISTEMA DE NÍVEIS) ──────────────────────────────
+       Boas Práticas: Usar gradientes e sombras suaves (box-shadow) para 
+       destacar o elemento de maior importância da página.
+    */
     .xp-card {
         background: linear-gradient(135deg, #2d5a27, #4a8c42);
         color: white;
@@ -21,166 +27,110 @@
         padding: 28px 32px;
         box-shadow: 0 10px 30px rgba(45, 90, 39, 0.3);
     }
-    .xp-card h2 { color: white; font-family: 'Libre Baskerville', serif; }
-    .xp-card .progress {
-        height: 12px;
-        border-radius: 10px;
-        background-color: rgba(255,255,255,0.2);
-    }
-    .xp-card .progress-bar {
-        background-color: #f0e68c;
-        border-radius: 10px;
-    }
+    
     .badge-nivel {
         background-color: #f0e68c;
         color: #2d5a27;
         font-weight: bold;
         border-radius: 20px;
         padding: 5px 16px;
-        font-size: 0.85rem;
     }
 
-    /* ── Cards de livro com efeito de vidro ── */
+    /* ─── GRID DE LIVROS (GALLERY VIEW) ────────────────────────────────────
+       Boas Práticas: O 'object-fit: cover' é o seu melhor amigo de editor. 
+       Garante que as capas não fiquem esticadas ou achatadas.
+    */
     .livro-card {
         background: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(5px);
         border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s ease-in-out;
         height: 100%;
         border: 1px solid rgba(45, 90, 39, 0.1);
     }
+
     .livro-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-5px); /* Feedback visual de seleção */
         box-shadow: 0 8px 25px rgba(0,0,0,0.13);
     }
+
     .livro-card img {
         width: 100%;
-        height: 200px;
+        height: 250px; /* Altura fixa para manter o grid simétrico */
         object-fit: cover;
     }
-    .capa-placeholder {
-        width: 100%;
-        height: 200px;
-        background: linear-gradient(135deg, #e8f5e3, #c8e6c0);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-    }
-    .livro-card .card-body { padding: 14px 16px; }
-    .livro-titulo {
-        font-weight: bold;
-        font-size: 0.9rem;
-        line-height: 1.3;
-        margin-bottom: 4px;
-        color: #222;
-    }
-    .livro-paginas {
-        font-size: 0.78rem;
-        color: #888;
-        margin-bottom: 8px;
-    }
-    .btn-deletar {
-        background: none;
-        border: none;
-        color: #dc3545;
-        font-size: 0.78rem;
-        cursor: pointer;
-        padding: 3px 8px;
-        border-radius: 8px;
-        transition: background 0.2s;
-    }
-    .btn-deletar:hover { background-color: #fff0f0; }
-
-    /* ── Estante vazia ── */
-    .estante-vazia {
-        text-align: center;
-        padding: 60px 20px;
-        color: #555;
-    }
-    .estante-vazia .icone { font-size: 4rem; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
 
-<!-- Lógica de Nível: 300 XP por Nível -->
+    <!-- ─── MOTOR DE GAMIFICAÇÃO (JINJA2) ───────────────────────────────────
+         🎓 NOTA DE ESTUDO: Calculamos tudo aqui para evitar sobrecarregar o app.py.
+         Divisor = 300 páginas por nível.
+    -->
     {% set divisor = 300 %}
     {% set nivel = (xp // divisor) + 1 %}
     {% set xp_no_nivel = xp % divisor %}
     {% set progresso = ((xp_no_nivel / divisor) * 100) | int %}
 
-    {% if nivel <= 3 %}
-        {% set titulo_rank = "Broto do Bosque" %}
-        {% set icone_rank = "🌱" %}
-    {% elif nivel <= 9 %}
-        {% set titulo_rank = "Guardião das Trilhas" %}
-        {% set icone_rank = "🌿" %}
-    {% elif nivel <= 19 %}
-        {% set titulo_rank = "Protetor da Fauna" %}
-        {% set icone_rank = "🌳" %}
-    {% elif nivel <= 39 %}
-        {% set titulo_rank = "Sábio das Sombras" %}
-        {% set icone_rank = "🦉" %}
-    {% else %}
-        {% set titulo_rank = "Mestre de Itaquera" %}
-        {% set icone_rank = "✨" %}
+    <!-- 🌳 Títulos de Rank baseados no progresso -->
+    {% if nivel <= 3 %} {% set titulo_rank, icone_rank = "Broto do Bosque", "🌱" %}
+    {% elif nivel <= 9 %} {% set titulo_rank, icone_rank = "Guardião das Trilhas", "🌿" %}
+    {% elif nivel <= 19 %} {% set titulo_rank, icone_rank = "Protetor da Fauna", "🌳" %}
+    {% else %} {% set titulo_rank, icone_rank = "Mestre de Itaquera", "✨" %}
     {% endif %}
 
     <div class="xp-card mb-4">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
                 <h2 class="mb-0">{{ session['usuario_nome'] }}</h2>
-                <p class="mb-0 opacity-75 small"><strong>{{ titulo_rank }}</strong></p>
+                <p class="mb-0 opacity-75"><strong>{{ titulo_rank }}</strong></p>
             </div>
             <span class="badge-nivel" style="font-size: 1.2rem;">
-                {{ nivel }} {{ icone_rank }}
+                Nível {{ nivel }} {{ icone_rank }}
             </span>
         </div>
         
         <div class="d-flex justify-content-between small opacity-75 mb-1">
             <span>⭐ {{ xp }} XP total</span>
-            <span>{{ xp_no_nivel }} / 300 para o próximo nível</span>
+            <span>{{ xp_no_nivel }} / {{ divisor }} para o próximo nível</span>
         </div>
         <div class="progress">
-            <div class="progress-bar" role="progressbar"
-                 style="width: {{ progresso }}%"
-                 aria-valuenow="{{ progresso }}" aria-valuemin="0" aria-valuemax="100">
-            </div>
+            <div class="progress-bar" style="width: {{ progresso }}%"></div>
         </div>
     </div>
 
-    <!-- Cabeçalho da estante -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 style="color: #2d5a27; font-family: 'Libre Baskerville', serif; margin:0;">
-            📚 Meus Livros
+    <!-- ─── ESTANTE DE LIVROS ─────────────────────────────────────────────── -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold" style="color: #2d5a27; font-family: 'Libre Baskerville', serif;">
+            📚 Minha Coleção
         </h4>
-        <a href="/cadastrar_livros" class="btn btn-bosque">+ Adicionar Livro</a>
+        <a href="/cadastrar_livros" class="btn btn-bosque">+ Novo Livro</a>
     </div>
 
-    <!-- Grid de livros -->
     {% if livros %}
         <div class="row g-3">
             {% for titulo, paginas, capa, id in livros %}
             <div class="col-6 col-md-4 col-lg-3">
-                <div class="livro-card">
+                <div class="livro-card shadow-sm">
+                    <!-- 🖼️ Lógica de Imagem: Fallback para capas ausentes -->
                     {% if capa.startswith('http') %}
                         <img src="{{ capa }}" alt="{{ titulo }}">
-                    {% elif capa and capa != 'padrao.jpg' and capa != 'padrão.jpg' %}
-                        <img src="/static/uploads/{{ capa }}" alt="{{ titulo }}">
                     {% else %}
-                        <div class="capa-placeholder">📖</div>
+                        <div class="capa-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 250px;">
+                            <span style="font-size: 3rem;">📖</span>
+                        </div>
                     {% endif %}
+                    
                     <div class="card-body">
-                        <p class="livro-titulo">{{ titulo }}</p>
-                        <p class="livro-paginas">{{ paginas }} páginas · +{{ paginas }} XP</p>
-                        <a href="/deletar_livro/{{ id }}"
-                           class="btn-deletar"
-                           onclick="return confirm('Remover \'{{ titulo }}\' da estante?')">
-                            🗑 Remover
+                        <p class="livro-titulo text-truncate" title="{{ titulo }}">{{ titulo }}</p>
+                        <p class="livro-paginas small text-muted">{{ paginas }} págs · +{{ paginas }} XP</p>
+                        <a href="/deletar_livro/{{ id }}" 
+                           class="btn-deletar text-danger text-decoration-none small"
+                           onclick="return confirm('Deseja mesmo remover este livro?')">
+                            🗑️ Remover
                         </a>
                     </div>
                 </div>
@@ -188,10 +138,11 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="estante-vazia">
-            <div class="icone">📭</div>
-            <h5 class="mt-3">Sua estante está vazia</h5>
-            <p>Adicione seu primeiro livro para começar a ganhar XP!</p>
+        <!-- 📭 Estado Vazio (Empty State): Essencial para UX -->
+        <div class="text-center py-5">
+            <p class="display-1">📭</p>
+            <h5>Sua estante está em branco...</h5>
+            <p class="text-muted">Que tal começar uma nova aventura hoje?</p>
             <a href="/cadastrar_livros" class="btn btn-bosque mt-2">Adicionar meu primeiro livro</a>
         </div>
     {% endif %}

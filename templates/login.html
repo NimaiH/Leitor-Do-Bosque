@@ -4,46 +4,74 @@
 
 {% block extra_css %}
 <style>
-    /* Mantendo apenas o que é exclusivo do visual de login */
+    /* ─── ESTILIZAÇÃO DO PORTAL ──────────────────────────────────────────
+       Boas Práticas: O fundo com 'min-height: 100vh' garante que a imagem 
+       cubra toda a tela, mesmo se o conteúdo do card for pequeno.
+    */
     body {
         background: linear-gradient(rgba(45, 90, 39, 0.1), rgba(45, 90, 39, 0.1)),
                     url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=1500');
         background-size: cover;
         background-position: center;
+        background-attachment: fixed; /* Mantém o fundo estático ao rolar */
         min-height: 100vh;
     }
+
+    /* Glassmorphism: Reforça a estética moderna de "vidro". */
     .card-login {
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(10px);
         border-radius: 20px;
         box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 12px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
+<div class="container py-5 d-flex align-items-center" style="min-height: 80vh;">
+    <div class="row justify-content-center w-100">
         <div class="col-md-5 col-lg-4">
             <div class="card card-login p-4">
-                <h2 class="text-center mb-4">Bem-vindo de volta</h2>
+                <div class="text-center mb-4">
+                    <!-- 🌲 Identidade Visual: Reforça o nome do projeto no login -->
+                    <h2 class="fw-bold" style="color: var(--verde-bosque); font-family: 'Libre Baskerville', serif;">
+                        Bem-vindo
+                    </h2>
+                    <p class="text-muted small">Continue sua jornada literária</p>
+                </div>
+
+                <!-- 🛡️ MENSAGEM DE ERRO: Crucial para o usuário saber se errou a senha -->
                 {% if erro %}
-                <div class="alert alert-danger">{{ erro }}</div>
+                <div class="alert alert-danger py-2 small text-center" role="alert">
+                    {{ erro }}
+                </div>
                 {% endif %}
+
+                <!-- 🔐 FORMULÁRIO DE LOGIN: Deve usar POST por segurança (não mostra senha na URL)[cite: 8] -->
                 <form action="/login" method="POST">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">E-mail</label>
-                        <input type="email" name="email" class="form-control" required>
+                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold">Senha</label>
-                        <input type="password" name="senha" class="form-control" required>
+                        <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
                     </div>
-                    <button type="submit" class="btn btn-bosque w-100">Entrar no Bosque</button>
+                    
+                    <button type="submit" class="btn btn-bosque w-100 py-2 fw-bold">
+                        Entrar no Bosque
+                    </button>
                 </form>
-                <div class="text-center mt-3">
+
+                <div class="text-center mt-4">
                     <p class="small text-muted">Ainda não tem uma conta? <br>
-                        <a href="/cadastro" class="text-success fw-bold text-decoration-none">Criar Conta</a>
+                        <a href="/cadastro" class="text-success fw-bold text-decoration-none">Criar Nova Conta</a>
                     </p>
                 </div>
             </div>

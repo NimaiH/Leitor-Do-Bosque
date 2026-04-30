@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Cadastrar Novo Livro - Leitor do Bosque{% endblock %}
+{% block title %}Novo Livro - Leitor do Bosque{% endblock %}
 
 {% block extra_css %}
 <style>
+    /* ─── DESIGN DO AMBIENTE (RPG SENSE) ───────────────────────────────────
+       Boas Práticas: O 'background-attachment: fixed' cria o efeito de fundo 
+       estático enquanto o card desliza por cima, comum em sites premium.
+    */
     .cadastro-livro-wrapper {
         background: linear-gradient(rgba(200, 217, 193, 0.7), rgba(200, 217, 193, 0.7)),
                     url('https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=1500');
@@ -16,26 +20,24 @@
         justify-content: center;
         padding: 50px 0;
     }
-    .card-cadastro-livro { border-radius: 20px; border: none; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); }
+
+    /* Card de Vidro (Glassmorphism): Melhora o contraste contra o fundo vivo */
+    .card-cadastro-livro { 
+        border-radius: 20px; 
+        border: none; 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(5px); 
+    }
     
-    /* Lista de Sugestões Estilizada */
+    /* Lista de Sugestões: Z-index alto para flutuar sobre outros elementos */
     #lista_resultados {
         max-height: 300px;
         overflow-y: auto;
         border-radius: 0 0 15px 15px;
         border: 1px solid #c3d9c1;
+        z-index: 1000;
     }
     .badge-xp { background-color: #2d5a27; color: white; border-radius: 10px; padding: 4px 8px; font-size: 0.7rem; }
-    
-    /* Botão de XP que não parece campo de texto */
-    .status-xp {
-        background: #f8f9fa;
-        border: 2px dashed #c3d9c1;
-        border-radius: 15px;
-        padding: 15px;
-        text-align: center;
-        color: #666;
-    }
 </style>
 {% endblock %}
 
@@ -51,6 +53,9 @@
                             <p class="text-muted">Busque o título para carregar os dados reais 🌿</p>
                         </div>
 
+                        <!-- 🛠️ FORMULÁRIO INTELIGENTE: Note que os campos reais estão ocultos (hidden)
+                             O usuário preenche a busca, mas o que vai para o banco são os dados da API.
+                        -->
                         <form action="/salvar_livro" method="POST" id="form_livro">
                             <input type="hidden" id="capa_url_input" name="capa_url">
                             <input type="hidden" id="paginas_input" name="paginas">
@@ -58,13 +63,14 @@
 
                             <div class="mb-4 position-relative">
                                 <label class="form-label fw-bold">Buscar Título</label>
-                                <input type="text" id="titulo_busca" class="form-control form-control-lg" placeholder="Ex: Harry Potter..." autocomplete="off" required>
+                                <input type="text" id="titulo_busca" class="form-control form-control-lg" placeholder="Ex: O Senhor dos Anéis..." autocomplete="off" required>
                                 
-                                <div id="lista_resultados" class="list-group position-absolute w-100 shadow-lg" style="z-index: 1000; display: none;">
-                                    </div>
+                                <!-- Container onde o JavaScript vai injetar as sugestões -->
+                                <div id="lista_resultados" class="list-group position-absolute w-100 shadow-lg" style="display: none;"></div>
                             </div>
 
-                            <div id="status_selecionado" class="status-xp mb-4">
+                            <!-- Preview Visual: Dá confiança ao usuário de que escolheu o livro certo -->
+                            <div id="status_selecionado" class="status-xp mb-4 text-center p-3 border rounded">
                                 <div id="preview_capa" class="mb-2"></div>
                                 <div id="detalhes_livro">Nenhum livro selecionado ainda</div>
                             </div>
@@ -82,95 +88,78 @@
 </div>
 
 <script>
+    /* 
+       🎓 LOGICA DA API (JavaScript)
+       Este código faz a ponte entre o seu site e os servidores do Google.
+    */
     const inputBusca = document.getElementById('titulo_busca');
     const listaSugestoes = document.getElementById('lista_resultados');
     const btnConfirmar = document.getElementById('btn_confirmar');
-    const statusDetalhes = document.getElementById('detalhes_livro');
     
     let tempoEspera;
 
+    // Debounce: Evita fazer centenas de buscas enquanto o usuário digita.
     inputBusca.addEventListener('input', () => {
         clearTimeout(tempoEspera);
         const termo = inputBusca.value.trim();
-        /* Mostra os livros apenas depois de o usuário inserir 3 caracteres */
-        if (termo.length < 3    ) {
+        if (termo.length < 3) {
             listaSugestoes.style.display = 'none';
             return;
         }
-
+        // Espera 600ms após o usuário parar de digitar para chamar a API[cite: 5]
         tempoEspera = setTimeout(() => buscarLivro(termo), 600);
     });
 
     async function buscarLivro(termo) {
-    listaSugestoes.innerHTML = '<div class="list-group-item">Procurando no oráculo...</div>';
-    listaSugestoes.style.display = 'block';
+        listaSugestoes.innerHTML = '<div class="list-group-item">Procurando no oráculo...</div>';
+        listaSugestoes.style.display = 'block';
 
-    try {
-        // Mudamos o termo para ser mais específico e removemos espaços extras
-        const query = encodeURIComponent(termo.trim());
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books`);
-        
-        if (!response.ok) throw new Error('Falha na resposta da API');
-        
-        const data = await response.json();
+        try {
+            const query = encodeURIComponent(termo);
+            const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5`);
+            const data = await response.json();
 
-        listaSugestoes.innerHTML = '';
-        if (data.items && data.items.length > 0) {
-            data.items.forEach(item => {
-                const info = item.volumeInfo;
-                const titulo = info.title;
-                const paginas = info.pageCount || 0;
-                
-                // Pegamos a melhor resolução de imagem disponível
-                let capa = '';
-                if (info.imageLinks) {
-                    capa = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail;
-                    // Forçamos o link a ser HTTPS para evitar bloqueios de segurança
-                    capa = capa.replace('http://', 'https://');
-                }
+            listaSugestoes.innerHTML = '';
+            if (data.items) {
+                data.items.forEach(item => {
+                    const info = item.volumeInfo;
+                    const titulo = info.title;
+                    const paginas = info.pageCount || 0;
+                    let capa = info.imageLinks ? info.imageLinks.thumbnail.replace('http://', 'https://') : '';
 
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-3';
-                btn.innerHTML = `
-                    <img src="${capa || 'https://via.placeholder.com/40x60?text=Sem+Capa'}" style="width: 40px; height: 60px; border-radius: 4px; object-fit: cover;">
-                    <div style="flex: 1; min-width: 0;">
-                        <div class="fw-bold small text-truncate">${titulo}</div>
-                        <span class="badge-xp">${paginas} Páginas</span>
-                    </div>
-                `;
-                btn.onclick = () => selecionar(titulo, paginas, capa);
-                listaSugestoes.appendChild(btn);
-            });
-        } else {
-            listaSugestoes.innerHTML = '<div class="list-group-item text-danger">Nenhum livro encontrado. Tente ser mais específico!</div>';
+                    // Cria o botão de sugestão dinamicamente[cite: 5]
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-3';
+                    btn.innerHTML = `
+                        <img src="${capa || 'https://via.placeholder.com/40x60'}" style="width: 40px; height: 60px; object-fit: cover;">
+                        <div>
+                            <div class="fw-bold small">${titulo}</div>
+                            <span class="badge-xp">${paginas} Páginas</span>
+                        </div>
+                    `;
+                    btn.onclick = () => selecionar(titulo, paginas, capa);
+                    listaSugestoes.appendChild(btn);
+                });
+            }
+        } catch (error) {
+            listaSugestoes.innerHTML = '<div class="list-group-item text-danger">Erro ao buscar livros.</div>';
         }
-    } catch (error) {
-        console.error("Erro na busca:", error);
-        listaSugestoes.innerHTML = '<div class="list-group-item text-warning">Livro não encontrado, tente novamente!</div>';
     }
-}
 
     function selecionar(titulo, paginas, capa) {
-        // Preenche os campos ocultos que vão para o Python
+        // Alimenta os inputs ocultos para o envio do formulário[cite: 5]
         document.getElementById('titulo_final').value = titulo;
         document.getElementById('paginas_input').value = paginas;
         document.getElementById('capa_url_input').value = capa;
         
-        // Atualiza a interface
         inputBusca.value = titulo;
         listaSugestoes.style.display = 'none';
         btnConfirmar.disabled = false;
         btnConfirmar.innerHTML = `Adicionar à Estante (+${paginas} XP)`;
-
-        const previewCapa = document.getElementById('preview_capa');
-        if (capa) {
-            previewCapa.innerHTML = `<img src="${capa}" style="height: 120px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">`;
-        } else {
-            previewCapa.innerHTML = "📖";
-        }
         
-        statusDetalhes.innerHTML = `<strong class="text-success">${titulo}</strong><br><small>${paginas} páginas confirmadas</small>`;
+        document.getElementById('preview_capa').innerHTML = capa ? `<img src="${capa}" style="height: 120px;">` : "📖";
+        document.getElementById('detalhes_livro').innerHTML = `<strong>${titulo}</strong><br>${paginas} páginas`;
     }
 </script>
 {% endblock %}
