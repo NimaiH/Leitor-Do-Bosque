@@ -4,12 +4,22 @@
 
 {% block extra_css %}
 <style>
+    /* ── Background Temático ── */
+    body { 
+        background-image: linear-gradient(rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.8)), 
+                          url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2071');
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+    }
+
     /* ── Card de XP ── */
     .xp-card {
         background: linear-gradient(135deg, #2d5a27, #4a8c42);
         color: white;
         border-radius: 20px;
         padding: 28px 32px;
+        box-shadow: 0 10px 30px rgba(45, 90, 39, 0.3);
     }
     .xp-card h2 { color: white; font-family: 'Libre Baskerville', serif; }
     .xp-card .progress {
@@ -30,14 +40,16 @@
         font-size: 0.85rem;
     }
 
-    /* ── Cards de livro ── */
+    /* ── Cards de livro com efeito de vidro ── */
     .livro-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(5px);
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         transition: transform 0.2s, box-shadow 0.2s;
         height: 100%;
+        border: 1px solid rgba(45, 90, 39, 0.1);
     }
     .livro-card:hover {
         transform: translateY(-4px);
@@ -86,7 +98,7 @@
     .estante-vazia {
         text-align: center;
         padding: 60px 20px;
-        color: #aaa;
+        color: #555;
     }
     .estante-vazia .icone { font-size: 4rem; }
 </style>
@@ -95,22 +107,43 @@
 {% block content %}
 <div class="container py-4">
 
-    <!-- Card de XP e nível -->
-    {% set nivel = (xp // 500) + 1 %}
-    {% set xp_no_nivel = xp % 500 %}
-    {% set progresso = ((xp_no_nivel / 500) * 100) | int %}
+<!-- Lógica de Nível: 300 XP por Nível -->
+    {% set divisor = 300 %}
+    {% set nivel = (xp // divisor) + 1 %}
+    {% set xp_no_nivel = xp % divisor %}
+    {% set progresso = ((xp_no_nivel / divisor) * 100) | int %}
+
+    {% if nivel <= 3 %}
+        {% set titulo_rank = "Broto do Bosque" %}
+        {% set icone_rank = "🌱" %}
+    {% elif nivel <= 9 %}
+        {% set titulo_rank = "Guardião das Trilhas" %}
+        {% set icone_rank = "🌿" %}
+    {% elif nivel <= 19 %}
+        {% set titulo_rank = "Protetor da Fauna" %}
+        {% set icone_rank = "🌳" %}
+    {% elif nivel <= 39 %}
+        {% set titulo_rank = "Sábio das Sombras" %}
+        {% set icone_rank = "🦉" %}
+    {% else %}
+        {% set titulo_rank = "Mestre de Itaquera" %}
+        {% set icone_rank = "✨" %}
+    {% endif %}
 
     <div class="xp-card mb-4">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h2 class="mb-0">Minha Estante</h2>
-                <p class="mb-0 opacity-75 small">{{ livros | length }} livro(s) cadastrado(s)</p>
+                <h2 class="mb-0">{{ session['usuario_nome'] }}</h2>
+                <p class="mb-0 opacity-75 small"><strong>{{ titulo_rank }}</strong></p>
             </div>
-            <span class="badge-nivel">Nível {{ nivel }} 🌿</span>
+            <span class="badge-nivel" style="font-size: 1.2rem;">
+                {{ nivel }} {{ icone_rank }}
+            </span>
         </div>
+        
         <div class="d-flex justify-content-between small opacity-75 mb-1">
             <span>⭐ {{ xp }} XP total</span>
-            <span>{{ xp_no_nivel }} / 500 para o próximo nível</span>
+            <span>{{ xp_no_nivel }} / 300 para o próximo nível</span>
         </div>
         <div class="progress">
             <div class="progress-bar" role="progressbar"

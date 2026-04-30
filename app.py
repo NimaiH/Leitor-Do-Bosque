@@ -176,6 +176,36 @@ def deletar_livro(id):
     conexao.close()
     return redirect(url_for('estante'))
 
+# ─── RANKING ──────────────────────────────────────────────────────────────────
+
+@app.route('/ranking')
+def ranking():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login'))
+
+    conexao = sqlite3.connect('livros.db')
+    cursor = conexao.cursor()
+    
+    # Busca o nome, soma de páginas (XP) e contagem de livros lidos de cada usuário
+    cursor.execute("""
+        SELECT 
+            u.nome, 
+            SUM(l.paginas) as total_xp, 
+            COUNT(l.id) as total_livros
+        FROM usuarios u
+        LEFT JOIN livros l ON u.id = l.usuario_id
+        GROUP BY u.id
+        ORDER BY total_xp DESC
+    """)
+    
+    dados_ranking = cursor.fetchall()
+    conexao.close()
+    
+    # Passamos o divisor de 300 e os dados para o ranking.html
+    return render_template('ranking.html', ranking=dados_ranking, divisor=300)
+
+#-----------------------------------------------------------------------#
+
 
 @app.route("/sobre")
 def sobre():
